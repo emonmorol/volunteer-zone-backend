@@ -21,6 +21,9 @@ async function run() {
     const categoryCollection = client
       .db("volunteerCategories")
       .collection("category");
+    const VolunteerCollection = client
+      .db("volunteerCategories")
+      .collection("volunteer");
     app.use("/categories", async (req, res) => {
       const query = {};
       const cursor = categoryCollection.find(query);
@@ -31,6 +34,11 @@ async function run() {
     app.post("/category", async (req, res) => {
       const category = req.body;
       const result = await categoryCollection.insertOne(category);
+      res.send(result);
+    });
+    app.post("/addVolunteer", async (req, res) => {
+      const volunteer = req.body;
+      const result = await VolunteerCollection.insertOne(volunteer);
       res.send(result);
     });
   } finally {
