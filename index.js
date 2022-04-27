@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -21,14 +21,29 @@ async function run() {
     const categoryCollection = client
       .db("volunteerCategories")
       .collection("category");
-    const VolunteerCollection = client
+    const volunteerCollection = client
       .db("volunteerCategories")
       .collection("volunteer");
-    app.use("/categories", async (req, res) => {
+    app.get("/categories", async (req, res) => {
       const query = {};
       const cursor = categoryCollection.find(query);
       const categories = await cursor.toArray();
       res.send(categories);
+    });
+
+    app.get("/donations", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const cursor = volunteerCollection.find(query);
+      const donations = await cursor.toArray();
+      res.send(donations);
+    });
+
+    app.delete("/donate/:id", async (req, res) => {
+      const donationId = req.params.id;
+      const query = { _id: ObjectId(donationId) };
+      const result = await volunteerCollection.deleteOne(query);
+      res.send(result);
     });
 
     app.post("/category", async (req, res) => {
@@ -36,9 +51,10 @@ async function run() {
       const result = await categoryCollection.insertOne(category);
       res.send(result);
     });
-    app.post("/addVolunteer", async (req, res) => {
+
+    app.post("/addDonation", async (req, res) => {
       const volunteer = req.body;
-      const result = await VolunteerCollection.insertOne(volunteer);
+      const result = await volunteerCollection.insertOne(volunteer);
       res.send(result);
     });
   } finally {
